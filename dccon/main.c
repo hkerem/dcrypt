@@ -60,6 +60,8 @@ static void print_usage()
 		L" -version                        Display DiskCryptor version\n"
 		L" -benchmark                      Encryption benchmark\n"
 		L" -config                         Change program configuration\n"
+		L" -config-mydlp                   Change program configuration to MyDLP defaults\n"
+		L" -deconfig-mydlp                 Change program configuration to MyDLP disabled defaults\n"
 		L" -keygen [file]                  Make 64 bytes random keyfile\n"
 		L" -bsod                           Erase all keys in memory and generate BSOD\n"
 		L"________________________________________________________________________________\n"
@@ -1448,6 +1450,56 @@ int wmain(int argc, wchar_t *argv[])
 					case '8': set_flag(dc_conf.conf_flags, CONF_BLOCK_UNENC_CDROM, onoff); break;
 				}
 			} while (1);
+
+			if ( (resl = dc_save_conf(&dc_conf)) == ST_OK ) {
+				wprintf(L"Configuration successfully saved\n");
+			}
+		}
+
+		if ( (argc >= 2) && (wcscmp(argv[1], L"-config-mydlp") == 0) ) 
+		{
+			dc_conf_data dc_conf;
+
+			if ( (resl = dc_load_conf(&dc_conf)) != ST_OK ) {
+				break;
+			}
+
+			set_flag(dc_conf.conf_flags, CONF_CACHE_PASSWORD, 1);
+			set_flag(dc_conf.conf_flags, CONF_HIDE_DCSYS, 1);
+
+			if ( (dc_conf.load_flags & DST_HW_CRYPTO) != 0 )
+				set_flag(dc_conf.conf_flags, CONF_HW_CRYPTO, 1);
+				
+			set_flag(dc_conf.conf_flags, CONF_AUTOMOUNT_BOOT, 1); 
+			set_flag(dc_conf.conf_flags, CONF_ENABLE_SSD_OPT, 1);
+				
+			set_flag(dc_conf.conf_flags, CONF_BLOCK_UNENC_REMOVABLE, 1);
+
+
+			if ( (resl = dc_save_conf(&dc_conf)) == ST_OK ) {
+				wprintf(L"Configuration successfully saved\n");
+			}
+		}
+
+		if ( (argc >= 2) && (wcscmp(argv[1], L"-deconfig-mydlp") == 0) ) 
+		{
+			dc_conf_data dc_conf;
+
+			if ( (resl = dc_load_conf(&dc_conf)) != ST_OK ) {
+				break;
+			}
+
+			set_flag(dc_conf.conf_flags, CONF_CACHE_PASSWORD, 0);
+			set_flag(dc_conf.conf_flags, CONF_HIDE_DCSYS, 1);
+
+			if ( (dc_conf.load_flags & DST_HW_CRYPTO) != 0 )
+				set_flag(dc_conf.conf_flags, CONF_HW_CRYPTO, 1);
+				
+			set_flag(dc_conf.conf_flags, CONF_AUTOMOUNT_BOOT, 0); 
+			set_flag(dc_conf.conf_flags, CONF_ENABLE_SSD_OPT, 1);
+				
+			set_flag(dc_conf.conf_flags, CONF_BLOCK_UNENC_REMOVABLE, 0);
+
 
 			if ( (resl = dc_save_conf(&dc_conf)) == ST_OK ) {
 				wprintf(L"Configuration successfully saved\n");
